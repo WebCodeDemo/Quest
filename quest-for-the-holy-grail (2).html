@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Quest For The Holy Grail</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --cobalt:    #1a3fff;
+      --cobalt-lit:#4d6fff;
+      --crimson:   #d41030;
+      --crimson-lit:#ff2448;
+      --amber:     #ffaa00;
+      --amber-lit: #ffd040;
+      --emerald:   #00c060;
+      --violet:    #9b30ff;
+      --ink:       #08080f;
+      --ink2:      #0e0e1a;
+      --white:     #ffffff;
+      --muted:     rgba(255,255,255,0.38);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+      background: var(--ink);
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      color: var(--white);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100dvh;
+    }
+
+    /* ── Animated background grid ── */
+    #bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+    }
+    #bg-svg {
+      width: 100%;
+      height: 100%;
+      opacity: 0.07;
+    }
+    /* Colour orbs */
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(70px);
+      animation: orbDrift 8s ease-in-out infinite alternate;
+    }
+    .orb-a { width:260px; height:260px; background:var(--cobalt);   top:-60px;  left:-60px;  animation-delay:0s;   opacity:0.55; }
+    .orb-b { width:220px; height:220px; background:var(--crimson);  bottom:-40px; right:-40px; animation-delay:-3s; opacity:0.5; }
+    .orb-c { width:180px; height:180px; background:var(--violet);   top:40%;    right:-40px; animation-delay:-5s; opacity:0.4; }
+    .orb-d { width:160px; height:160px; background:var(--emerald);  bottom:20%; left:-40px;  animation-delay:-2s; opacity:0.35; }
+    @keyframes orbDrift {
+      from { transform: translate(0,0) scale(1); }
+      to   { transform: translate(30px,20px) scale(1.12); }
+    }
+
+    #app {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      max-width: 420px;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 24px 16px;
+    }
+
+    .screen {
+      display: none;
+      width: 100%;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      text-align: center;
+    }
+    .screen.active { display: flex; }
+
+    /* ══════════════════════
+       START SCREEN
+    ══════════════════════ */
+    #screen-start .grail-emblem { animation: popIn 0.6s 0.05s cubic-bezier(0.34,1.56,0.64,1) both; }
+    #screen-start h1             { animation: popIn 0.6s 0.18s cubic-bezier(0.34,1.56,0.64,1) both; }
+    #screen-start .start-sub     { animation: fadeUp 0.5s 0.32s ease both; }
+    #screen-start .btn           { animation: popIn 0.6s 0.42s cubic-bezier(0.34,1.56,0.64,1) both; }
+
+    .grail-emblem {
+      font-size: 5rem;
+      line-height: 1;
+      filter: drop-shadow(0 0 30px rgba(255,170,0,0.9));
+      animation: floatGlow 3s ease-in-out infinite;
+    }
+    @keyframes floatGlow {
+      0%,100%{ transform:translateY(0) scale(1);     filter:drop-shadow(0 0 20px rgba(255,170,0,0.8)); }
+      50%    { transform:translateY(-8px) scale(1.05); filter:drop-shadow(0 0 40px rgba(255,208,64,1)); }
+    }
+
+    #screen-start h1 {
+      font-family: 'Black Han Sans', sans-serif;
+      font-size: 3rem;
+      line-height: 1.1;
+      letter-spacing: -0.01em;
+      color: var(--white);
+      text-shadow: 0 0 40px rgba(255,170,0,0.5);
+    }
+    /* "HOLY GRAIL" accent line */
+    #screen-start h1 span {
+      display: block;
+      color: var(--amber-lit);
+      text-shadow: 0 0 30px rgba(255,208,64,0.8);
+    }
+
+    .start-sub {
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    /* ══════════════════════
+       STARTING ITEM SCREEN
+    ══════════════════════ */
+    #screen-start-item { animation: fadeUp 0.5s cubic-bezier(0.22,1,0.36,1) both; }
+
+    .screen-eyebrow {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .item-reveal-box {
+      position: relative;
+      width: 100%;
+      background: rgba(255,255,255,0.05);
+      border: 1.5px solid rgba(255,255,255,0.15);
+      border-radius: 20px;
+      padding: 36px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .item-reveal-box::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(26,63,255,0.15) 0%, rgba(155,48,255,0.08) 100%);
+      pointer-events: none;
+    }
+    .item-reveal-name {
+      font-family: 'Black Han Sans', sans-serif;
+      font-size: 2.2rem;
+      color: var(--white);
+      line-height: 1.2;
+      position: relative;
+      z-index: 1;
+    }
+
+    .start-item-hint {
+      font-size: 0.92rem;
+      font-weight: 500;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    /* ══════════════════════
+       GAME SCREEN
+    ══════════════════════ */
+    #screen-game { gap: 10px; }
+
+    /* ── Panels ── */
+    .panel {
+      position: relative;
+      width: 100%;
+      border-radius: 20px;
+      padding: 20px 20px 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      overflow: hidden;
+    }
+
+    /* Inset shine */
+    .panel::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent 5%, rgba(255,255,255,0.25) 50%, transparent 95%);
+      pointer-events: none;
+    }
+
+    /* OFFER — cobalt blue */
+    #offer-panel {
+      background: linear-gradient(145deg, #0f1f7a 0%, #08103d 100%);
+      border: 1.5px solid var(--cobalt-lit);
+      box-shadow: 0 0 0 1px rgba(77,111,255,0.15), 0 8px 40px rgba(26,63,255,0.4), inset 0 0 60px rgba(26,63,255,0.08);
+    }
+
+    /* CURRENT — crimson red */
+    #current-panel {
+      background: linear-gradient(145deg, #6a0818 0%, #38040d 100%);
+      border: 1.5px solid var(--crimson-lit);
+      box-shadow: 0 0 0 1px rgba(255,36,72,0.15), 0 8px 40px rgba(212,16,48,0.4), inset 0 0 60px rgba(212,16,48,0.08);
+    }
+
+    .panel-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      align-self: flex-start;
+    }
+    #offer-panel   .panel-label { color: var(--cobalt-lit); }
+    #current-panel .panel-label { color: var(--crimson-lit); }
+
+    .panel-item-name {
+      font-family: 'Black Han Sans', sans-serif;
+      font-size: 1.9rem;
+      line-height: 1.2;
+      min-height: 60px;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    #offer-panel   .panel-item-name { color: #d0dcff; }
+    #current-panel .panel-item-name { color: #ffd0d8; }
+
+    /* ── VS row ── */
+    .vs-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+    }
+    .vs-line {
+      flex: 1; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+    }
+    .vs-label {
+      font-family: 'Black Han Sans', sans-serif;
+      font-size: 0.85rem;
+      letter-spacing: 0.2em;
+      color: rgba(255,255,255,0.25);
+    }
+
+    /* ══════════════════════
+       BUTTONS
+    ══════════════════════ */
+    .btn {
+      position: relative;
+      border: none;
+      border-radius: 14px;
+      font-family: 'Black Han Sans', sans-serif;
+      font-size: 1.05rem;
+      letter-spacing: 0.15em;
+      padding: 16px 36px;
+      cursor: pointer;
+      width: 100%;
+      overflow: hidden;
+      -webkit-tap-highlight-color: transparent;
+      transition: transform 0.1s ease, box-shadow 0.1s ease;
+      will-change: transform;
+    }
+    /* Top shine */
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 50%;
+      background: rgba(255,255,255,0.12);
+      border-radius: 14px 14px 0 0;
+      pointer-events: none;
+    }
+    .btn:active { transform: scale(0.96) translateY(2px); }
+
+    /* BEGIN / CONTINUE — amber */
+    .btn-primary {
+      background: linear-gradient(180deg, #ffcc30 0%, #e08000 100%);
+      color: #1a0800;
+      box-shadow: 0 5px 0 #7a4000, 0 8px 28px rgba(255,170,0,0.55);
+    }
+    .btn-primary:active { box-shadow: 0 2px 0 #7a4000, 0 3px 10px rgba(255,170,0,0.3); }
+
+    /* TRADE — cobalt */
+    .btn-trade {
+      background: linear-gradient(180deg, #5570ff 0%, #1230c0 100%);
+      color: #e0e8ff;
+      box-shadow: 0 5px 0 #08186a, 0 8px 28px rgba(26,63,255,0.6);
+      text-shadow: 0 1px 4px rgba(0,0,20,0.5);
+    }
+    .btn-trade:active { box-shadow: 0 2px 0 #08186a, 0 3px 10px rgba(26,63,255,0.3); }
+
+    /* KEEP — crimson */
+    .btn-keep {
+      background: linear-gradient(180deg, #ff2448 0%, #900020 100%);
+      color: #ffe0e8;
+      box-shadow: 0 5px 0 #4a0010, 0 8px 28px rgba(212,16,48,0.6);
+      text-shadow: 0 1px 4px rgba(40,0,0,0.5);
+    }
+    .btn-keep:active { box-shadow: 0 2px 0 #4a0010, 0 3px 10px rgba(212,16,48,0.3); }
+
+    /* QUEST AGAIN — amber */
+    .btn-replay {
+      background: linear-gradient(180deg, #ffcc30 0%, #e08000 100%);
+      color: #1a0800;
+      box-shadow: 0 5px 0 #7a4000, 0 8px 28px rgba(255,170,0,0.55);
+    }
+    .btn-replay:active { box-shadow: 0 2px 0 #7a4000, 0 3px 10px rgba(255,170,0,0.3); }
+
+    /* Ripple */
+    .ripple {
+      position: absolute;
+      border-radius: 50%;
+      transform: scale(0);
+      animation: rippleOut 0.55s ease-out;
+      pointer-events: none;
+    }
+    .r-blue   { background: rgba(77,111,255,0.45); }
+    .r-red    { background: rgba(255,36,72,0.4); }
+    .r-amber  { background: rgba(255,208,64,0.4); }
+    @keyframes rippleOut { to { transform: scale(4.5); opacity: 0; } }
+
+    /* ══════════════════════
+       WIN SCREEN
+    ══════════════════════ */
+    #screen-win { animation: popIn 0.6s cubic-bezier(0.34,1.56,0.64,1) both; }
+
+    .win-grail {
+      font-size: 6rem;
+      line-height: 1;
+      animation: winFloat 2s ease-in-out infinite;
+      filter: drop-shadow(0 0 30px rgba(255,208,64,1)) drop-shadow(0 0 70px rgba(255,170,0,0.6));
+    }
+    @keyframes winFloat {
+      0%,100%{ transform:translateY(0) scale(1); }
+      50%    { transform:translateY(-10px) scale(1.07); filter:drop-shadow(0 0 50px rgba(255,228,80,1)) drop-shadow(0 0 100px rgba(255,170,0,0.8)); }
+    }
+
+    #screen-win h2 {
+      font-family: 'Black Han Sans', sans-serif;
+      font-size: 2.6rem;
+      line-height: 1.15;
+      color: var(--white);
+      text-shadow: 0 0 30px rgba(255,170,0,0.6);
+    }
+    #screen-win h2 span { color: var(--amber-lit); }
+
+    #win-message {
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* ══════════════════════
+       KEYFRAMES
+    ══════════════════════ */
+    @keyframes fadeUp {
+      from { opacity:0; transform:translateY(12px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+    @keyframes popIn {
+      from { opacity:0; transform:scale(0.88); }
+      to   { opacity:1; transform:scale(1); }
+    }
+
+    /* Panel transitions */
+    @keyframes panelOutUp {
+      from { transform:translateY(0) scale(1);    opacity:1; }
+      to   { transform:translateY(-22px) scale(0.97); opacity:0; }
+    }
+    @keyframes panelInDown {
+      from { transform:translateY(-22px) scale(0.97); opacity:0; }
+      to   { transform:translateY(0) scale(1);    opacity:1; }
+    }
+
+    /* Flash veils */
+    @keyframes flashBlue {
+      0%  { opacity:0; background: radial-gradient(ellipse at 50% 30%, rgba(26,63,255,0.35), transparent 70%); }
+      30% { opacity:1; }
+      100%{ opacity:0; }
+    }
+    @keyframes flashRed {
+      0%  { opacity:0; background: radial-gradient(ellipse at 50% 70%, rgba(212,16,48,0.35), transparent 70%); }
+      30% { opacity:1; }
+      100%{ opacity:0; }
+    }
+    @keyframes flashAmber {
+      0%  { opacity:0; background: radial-gradient(ellipse at 50% 50%, rgba(255,200,0,0.3), transparent 70%); }
+      30% { opacity:1; }
+      100%{ opacity:0; }
+    }
+
+    .flash-veil {
+      position: fixed; inset:0;
+      pointer-events:none; z-index:200; opacity:0;
+    }
+    .flash-veil.blue  { animation: flashBlue  0.5s ease both; }
+    .flash-veil.red   { animation: flashRed   0.45s ease both; }
+    .flash-veil.amber { animation: flashAmber 0.5s ease both; }
+
+    /* Name glow on update */
+    @keyframes glowBlue {
+      0%  { color:#d0dcff; text-shadow:none; }
+      35% { color:#fff; text-shadow: 0 0 20px rgba(77,111,255,1), 0 0 50px rgba(77,111,255,0.6); }
+      100%{ color:#d0dcff; text-shadow:none; }
+    }
+    @keyframes glowRed {
+      0%  { color:#ffd0d8; text-shadow:none; }
+      35% { color:#fff; text-shadow: 0 0 20px rgba(255,80,100,1), 0 0 50px rgba(255,36,72,0.6); }
+      100%{ color:#ffd0d8; text-shadow:none; }
+    }
+    .glow-blue { animation: glowBlue 0.7s ease both; }
+    .glow-red  { animation: glowRed  0.7s ease both; }
+
+    /* KEEP — current panel pops */
+    @keyframes keepPop {
+      0%   { transform:scale(1); box-shadow: 0 0 0 1px rgba(255,36,72,0.15), 0 8px 40px rgba(212,16,48,0.4), inset 0 0 60px rgba(212,16,48,0.08); }
+      40%  { transform:scale(1.025) translateY(-6px); box-shadow: 0 0 0 2px rgba(255,80,100,0.6), 0 20px 60px rgba(255,36,72,0.5), inset 0 0 80px rgba(255,36,72,0.15); }
+      100% { transform:scale(1); box-shadow: 0 0 0 1px rgba(255,36,72,0.15), 0 8px 40px rgba(212,16,48,0.4), inset 0 0 60px rgba(212,16,48,0.08); }
+    }
+    .panel-keep-pop { animation: keepPop 0.55s cubic-bezier(0.22,1,0.36,1) both; }
+
+    /* TRADE — offer panel border flares */
+    @keyframes tradePulse {
+      0%,100%{ box-shadow: 0 0 0 1px rgba(77,111,255,0.15), 0 8px 40px rgba(26,63,255,0.4), inset 0 0 60px rgba(26,63,255,0.08); }
+      45%    { box-shadow: 0 0 0 3px rgba(77,111,255,0.7), 0 0 50px rgba(77,111,255,0.5), inset 0 0 80px rgba(77,111,255,0.2); }
+    }
+    .panel-trade-pulse { animation: tradePulse 0.6s ease; }
+
+    /* Canvas */
+    #fx-canvas { position:fixed; inset:0; pointer-events:none; z-index:999; }
+  </style>
+</head>
+<body>
+
+<!-- Background -->
+<div id="bg">
+  <div class="orb orb-a"></div>
+  <div class="orb orb-b"></div>
+  <div class="orb orb-c"></div>
+  <div class="orb orb-d"></div>
+  <svg id="bg-svg" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+        <path d="M40 0L0 0 0 40" fill="none" stroke="white" stroke-width="0.5"/>
+      </pattern>
+    </defs>
+    <rect width="100%" height="100%" fill="url(#grid)"/>
+  </svg>
+</div>
+
+<canvas id="fx-canvas"></canvas>
+<div class="flash-veil" id="flash-veil"></div>
+
+<div id="app">
+
+  <!-- Screen 1: Start -->
+  <div class="screen active" id="screen-start">
+    <div class="grail-emblem">⚗️</div>
+    <h1>Quest For<br><span>The Holy Grail</span></h1>
+    <p class="start-sub">Start with nothing.<br>Obtain THe Holy Grail.</p>
+    <button class="btn btn-primary" onclick="startGame()">BEGIN QUEST</button>
+  </div>
+
+  <!-- Screen 2: Starting Item -->
+  <div class="screen" id="screen-start-item">
+    <span class="screen-eyebrow">Your starting possession</span>
+    <div class="item-reveal-box">
+      <span class="item-reveal-name" id="start-item-name"></span>
+    </div>
+    <p class="start-item-hint"> <br> </p>
+    <button class="btn btn-primary" onclick="goToGame()">BEGIN TRADING</button>
+  </div>
+
+  <!-- Screen 3: Gameplay -->
+  <div class="screen" id="screen-game">
+
+    <div class="panel" id="offer-panel">
+      <span class="panel-label">Offered</span>
+      <span class="panel-item-name" id="offer-item-name"></span>
+      <button class="btn btn-trade" id="btn-trade" onclick="trade()">TRADE</button>
+    </div>
+
+    <div class="vs-row">
+      <div class="vs-line"></div>
+      <span class="vs-label">VS</span>
+      <div class="vs-line"></div>
+    </div>
+
+    <div class="panel" id="current-panel">
+      <button class="btn btn-keep" id="btn-keep" onclick="keep()">KEEP</button>
+      <span class="panel-item-name" id="current-item-name"></span>
+    </div>
+
+  </div>
+
+  <!-- Screen 4: Win -->
+  <div class="screen" id="screen-win">
+    <div class="win-grail">🏆</div>
+    <h2>The Holy<br><span>Grail is Yours</span></h2>
+    <p id="win-message"></p>
+    <button class="btn btn-replay" onclick="resetGame()">QUEST AGAIN</button>
+  </div>
+
+</div>
+
+<script>
+const ITEMS = [
+  ['Paperclip', 'Empty Tin Can', 'Broken Clock', 'Used Toilet Brush', 'Ball of Human Hair', 'Old newspaper', 'Toothpick', ''Torn Comic Book', 'Wilted Flower', 'Empty Bottle', 'Stale Bread', 'Worn-out Sock'],
+  ['Wooden Spoon', 'Paperback Book', 'Ceramic Mug', 'Can of Mrs Angry Soda', 'Glass of Milk', 'Get-Well Card With A Cartoon Nurse', 'Box of Unlabeled VHS Tapes', 'Bucket of Black Paint', 'Handwritten Confession Letter', 'Plastic Flamingo', 'Ballpoint Pen', 'Comb', 'Hand Sanitizer', 'AA Batteries', 'Bottle Opener'],
+  ['Leather Wallet', 'Stainless Steel Watch', 'Portable Radio', 'Supposedly Haunted Handkerchief ', 'Hamster', 'Live Bee Hive', 'Blonde Wig', 'Bag of Groceries', 'One Free Piano Lesson', 'One Share of Amazon Stock', 'Sealed Package (You Can Hear It Ticking)', 'Shark Tooth', 'Wheelchair With Bloodstains', 'Pawn Shop Katana', 'Bottle of Holy Water', 'Wireless Mouse', 'Digital Kitchen Scale'],
+  ['iPhone 17e', 'Versace Handbag', 'Vintage Vinyl Record', 'Small Meteorite', 'Robotic Prosthetic Arm', 'Barrel of Crude Oil', 'Pile of Jewelry Stolen During The Holocaust', 'Antique Grandfather Clock', 'Holy Grail Replica', 'Fancy Accordion', 'Artificial Heart', 'Truckload of Rubber Ducks', 'Briefcase Full of Counterfeit Money', 'Pair of Night-Vision Goggles', 'Giant Aquarium Filled With Piranhas'],
+  ['Samurai Armor Set', 'Autographed Movie Prop', 'Male Panda', 'Dolphin', 'Vial of Antivenom', 'Deed to The Choke Hut Restaurant', 'Recording Device With State Secrets', 'Enigma Machine From WWII', 'Johnny Cashs Guitar', 'Stradivarius Violin', 'Kurt Cobains Suicide Note', 'Ancient Egyptian Cat Mummy', 'Signed Photograph of L Ron Hubbard'],
+  ['The Mona Lisa', 'Apollo 11 Command Module', 'Albert Einstein's Brain', 'Nuclear Bomb', 'The Declaration of Independence', 'THe Rosetta Stone', 'The Blood Quran (written in Saddam Hussein's blood)', 'Tutankhamuns Death Mask', 'Dead Sea Scrolls', 'The Voynich Manuscript', 'The Hope Diamond'],
+  ['The Holy Grail'],
+];
+const MAX_LEVEL = ITEMS.length;
+
+let currentItem = null;
+let offerItem   = null;
+let turnCount   = 0;
+
+// ── Canvas ───────────────────────────────────────────────────
+const canvas = document.getElementById('fx-canvas');
+const ctx    = canvas.getContext('2d');
+let particles = [], animFrame = null;
+
+function resizeCanvas() { canvas.width = innerWidth; canvas.height = innerHeight; }
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+class Particle {
+  constructor(x, y, c) {
+    this.x = x; this.y = y;
+    this.vx = (Math.random()-0.5)*c.spread;
+    this.vy = -(Math.random()*c.rise + c.riseMin);
+    this.alpha = 1;
+    this.size  = Math.random()*c.maxSize + c.minSize;
+    this.color = c.colors[Math.floor(Math.random()*c.colors.length)];
+    this.decay = Math.random()*c.dr + c.dm;
+    this.g = c.g||0; this.r=Math.random()*6.28; this.rs=(Math.random()-.5)*.35;
+    this.shape=c.shape||'c'; this.sh=c.sh||0;
+  }
+  update(){ this.x+=this.vx; this.y+=this.vy; this.vy+=this.g; this.vx*=.98; this.alpha-=this.decay; this.size-=this.sh; this.r+=this.rs; }
+  draw(c){
+    if(this.alpha<=0||this.size<=0) return;
+    c.save(); c.globalAlpha=Math.max(0,this.alpha); c.fillStyle=this.color;
+    c.translate(this.x,this.y); c.rotate(this.r);
+    if(this.shape==='r'){ c.fillRect(-this.size/2,-this.size/2,this.size,this.size*.5); }
+    else if(this.shape==='s'){ star(c,0,0,4,this.size*.45,this.size); c.fill(); }
+    else { c.beginPath(); c.arc(0,0,this.size,0,6.28); c.fill(); }
+    c.restore();
+  }
+}
+function star(c,cx,cy,n,ir,or){
+  let r=Math.PI/2*3,s=Math.PI/n; c.beginPath(); c.moveTo(cx,cy-or);
+  for(let i=0;i<n;i++){ c.lineTo(cx+Math.cos(r)*or,cy+Math.sin(r)*or); r+=s; c.lineTo(cx+Math.cos(r)*ir,cy+Math.sin(r)*ir); r+=s; }
+  c.lineTo(cx,cy-or); c.closePath();
+}
+function spawn(x,y,cfg,n){ for(let i=0;i<n;i++) particles.push(new Particle(x,y,cfg)); }
+function startLoop(){ if(!animFrame) animFrame=requestAnimationFrame(tick); }
+function tick(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  particles=particles.filter(p=>p.alpha>0&&p.size>0);
+  particles.forEach(p=>{p.update();p.draw(ctx);});
+  animFrame=particles.length?requestAnimationFrame(tick):null;
+}
+
+// Presets
+const P_TRADE = { colors:['#4d6fff','#88aaff','#c0d0ff','#ffffff','#a0c8ff'], spread:10,rise:6,riseMin:2,maxSize:5,minSize:1.5,dr:.016,dm:.018,g:.06,sh:.03 };
+const P_KEEP  = { colors:['#ff2448','#ff6080','#ffc0c8','#ffffff','#ff80a0'], spread:8, rise:5,riseMin:1.5,maxSize:4,minSize:1.5,dr:.018,dm:.02,g:.07,sh:.03 };
+const P_CONFETTI = { colors:['#ffcc30','#4d6fff','#ff2448','#00c060','#ffffff','#c060ff','#ff9920','#40d8ff'], spread:15,rise:9,riseMin:3,maxSize:8,minSize:3,dr:.008,dm:.008,g:.15,sh:0,shape:'r' };
+const P_STARS = { colors:['#ffcc30','#ffffff','#ffaa00','#4d6fff','#ff2448','#c060ff'], spread:13,rise:10,riseMin:4,maxSize:6,minSize:2,dr:.01,dm:.01,g:.05,sh:.02,shape:'s' };
+
+function btnXY(el){ const r=el.getBoundingClientRect(); return{x:r.left+r.width/2,y:r.top+r.height/2}; }
+
+function flashVeil(cls){
+  const v=document.getElementById('flash-veil');
+  v.className='flash-veil'; void v.offsetWidth; v.className='flash-veil '+cls;
+}
+
+// ── Helpers ──────────────────────────────────────────────────
+function randAt(lvl){ const p=ITEMS[lvl-1]; return{name:p[Math.floor(Math.random()*p.length)],level:lvl}; }
+function genOffer(lvl){
+  const r=Math.random();
+  if(lvl===1) return r<2/3?randAt(1):randAt(2);
+  if(lvl===MAX_LEVEL) return randAt(MAX_LEVEL-1);
+  if(r<1/3) return randAt(lvl-1);
+  if(r<2/3) return randAt(lvl);
+  return randAt(lvl+1);
+}
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function lock(yes){ ['btn-trade','btn-keep'].forEach(id=>{ const b=document.getElementById(id); if(b) b.style.pointerEvents=yes?'':'none'; }); }
+function ripple(btn,cls){
+  const r=btn.getBoundingClientRect(), size=Math.max(r.width,r.height)*1.6;
+  const el=document.createElement('span');
+  el.className='ripple '+cls;
+  el.style.cssText=`width:${size}px;height:${size}px;left:${(r.width-size)/2}px;top:${(r.height-size)/2}px`;
+  btn.appendChild(el);
+  el.addEventListener('animationend',()=>el.remove());
+}
+function glow(id,cls){
+  const el=document.getElementById(id);
+  el.classList.remove('glow-blue','glow-red'); void el.offsetWidth; el.classList.add(cls);
+}
+
+// ── Game flow ─────────────────────────────────────────────────
+function startGame(){
+  turnCount=0;
+  currentItem=randAt(1);
+  document.getElementById('start-item-name').textContent=currentItem.name;
+  showScreen('screen-start-item');
+}
+
+function goToGame(){
+  // Generate offer first, THEN show screen — fixes blank panel bug
+  offerItem=genOffer(currentItem.level);
+  document.getElementById('offer-item-name').textContent=offerItem.name;
+  document.getElementById('current-item-name').textContent=currentItem.name;
+  showScreen('screen-game');
+}
+
+function renderGame(){
+  offerItem=genOffer(currentItem.level);
+  document.getElementById('offer-item-name').textContent=offerItem.name;
+  document.getElementById('current-item-name').textContent=currentItem.name;
+}
+
+// ── TRADE ─────────────────────────────────────────────────────
+function trade(){
+  turnCount++;
+  const btn=document.getElementById('btn-trade');
+  const offerPanel=document.getElementById('offer-panel');
+  const {x,y}=btnXY(btn);
+
+  lock(false);
+  ripple(btn,'r-blue');
+  spawn(x,y,P_TRADE,30);
+  startLoop();
+  flashVeil('blue');
+
+  offerPanel.classList.remove('panel-trade-pulse'); void offerPanel.offsetWidth;
+  offerPanel.classList.add('panel-trade-pulse');
+  offerPanel.style.animation='panelOutUp 0.22s ease both';
+
+  currentItem=offerItem;
+
+  setTimeout(()=>{
+    if(currentItem.level===MAX_LEVEL){ triggerWin(); return; }
+
+    renderGame();
+
+    // Sparks on the incoming name
+    const el=document.getElementById('offer-item-name');
+    const rr=el.getBoundingClientRect();
+    spawn(rr.left+rr.width/2, rr.top+rr.height/2, P_TRADE, 12);
+    startLoop();
+
+    offerPanel.style.animation='panelInDown 0.25s cubic-bezier(0.22,1,0.36,1) both';
+    glow('offer-item-name','glow-blue');
+    glow('current-item-name','glow-red');
+
+    setTimeout(()=>lock(true), 220);
+  }, 230);
+}
+
+// ── KEEP ──────────────────────────────────────────────────────
+function keep(){
+  turnCount++;
+  const btn=document.getElementById('btn-keep');
+  const cp=document.getElementById('current-panel');
+  const op=document.getElementById('offer-panel');
+  const {x,y}=btnXY(btn);
+
+  lock(false);
+  ripple(btn,'r-red');
+  spawn(x,y,P_KEEP,22);
+  startLoop();
+  flashVeil('red');
+
+  cp.classList.remove('panel-keep-pop'); void cp.offsetWidth;
+  cp.classList.add('panel-keep-pop');
+
+  op.style.animation='panelOutUp 0.2s ease both';
+
+  setTimeout(()=>{
+    renderGame();
+    op.style.animation='panelInDown 0.25s cubic-bezier(0.22,1,0.36,1) both';
+    glow('offer-item-name','glow-blue');
+    setTimeout(()=>lock(true), 220);
+  }, 210);
+}
+
+// ── WIN ───────────────────────────────────────────────────────
+function triggerWin(){
+  const W=canvas.width, H=canvas.height;
+
+  function burst(d){
+    setTimeout(()=>{
+      const cx=W*(.2+Math.random()*.6), cy=H*(.1+Math.random()*.5);
+      spawn(cx,cy,P_CONFETTI,60); spawn(cx,cy,P_STARS,20); startLoop();
+    },d);
+  }
+  [0,150,300,480,660,840,1020].forEach(burst);
+
+  // Side cannons
+  setTimeout(()=>{
+    spawn(0,H*.4,{...P_CONFETTI,spread:20,rise:14,riseMin:5},35);
+    spawn(W,H*.4,{...P_CONFETTI,spread:20,rise:14,riseMin:5},35);
+    spawn(W/2,H*.02,{...P_CONFETTI,spread:24,rise:8,riseMin:2},35);
+    startLoop();
+  },500);
+
+  // Big amber flash
+  flashVeil('amber');
+  setTimeout(()=>flashVeil('amber'),400);
+
+  setTimeout(()=>{
+    const s=turnCount!==1?'s':'';
+    document.getElementById('win-message').textContent=`You bartered your way to God in ${turnCount} turn${s}.`;
+    showScreen('screen-win');
+    lock(true);
+  }, 680);
+}
+
+function resetGame(){
+  particles=[]; ctx.clearRect(0,0,canvas.width,canvas.height);
+  showScreen('screen-start');
+}
+</script>
+</body>
+</html>
